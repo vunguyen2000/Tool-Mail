@@ -75,7 +75,7 @@ def process_account(line,name, passW):
     sleep(1)
     # # Khởi tạo trình duyệt và mở Gmail
     options = webdriver.ChromeOptions() 
-    options.add_argument('--port=9515')
+    options.add_argument('--port=9516')
     options.add_argument("--lang=en-us")
     options = uc.ChromeOptions()
     options.add_argument('--no-sandbox')

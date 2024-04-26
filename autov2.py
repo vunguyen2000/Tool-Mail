@@ -4,32 +4,37 @@ import os
 import signal
 import sys
 from time import sleep  
+import datetime
+
+now = datetime.datetime.now()
+
 def remove_duplicates_from_mail():
-    # Đọc nội dung của file success.txt và fail.txt
-   with open("mail.txt", "r") as mail_file:
-    mail_lines = mail_file.readlines()
-# Kiểm tra và đọc nội dung của file success.txt (nếu tồn tại)
-    if os.path.exists("success.txt"):
-        with open("success.txt", "r") as success_file:
-            success_lines = set(success_file.readlines())
-    else:
-        success_lines = set()
+    with open("success.txt", "r") as success_file:
+        success_lines = success_file.readlines()
 
-    # Kiểm tra và đọc nội dung của file fail.txt (nếu tồn tại)
-    if os.path.exists("fail.txt"):
-        with open("fail.txt", "r") as fail_file:
-            fail_lines = set(fail_file.readlines())
-    else:
-        fail_lines = set()
+    with open("fail.txt", "r") as fail_file:
+        fail_lines = fail_file.readlines()
 
-    # Loại bỏ các dòng trong mail.txt mà đã xuất hiện trong success.txt hoặc fail.txt
-    unique_mail_lines = [line for line in mail_lines if line.strip() not in success_lines and line.strip() not in fail_lines]
+    # Lấy email cần xoá từ dòng cuối cùng của fail.txt
+    email_to_remove_fail = fail_lines[-1].strip()
 
-    print("unique_mail_lines:",unique_mail_lines)
+    # Lấy email cần xoá từ dòng cuối cùng của success.txt
+    email_to_remove_success = success_lines[-1].strip()
 
-    # Ghi lại nội dung đã lọc vào file mail.txt
+    # Đọc nội dung của file mail.txt
+    with open("mail.txt", "r") as mail_file:
+        mail_lines = mail_file.readlines()
+
+    # Tìm và xoá dòng cần xoá trong mail.txt
+    for i, line in enumerate(mail_lines):
+        if email_to_remove_success in line:
+            del mail_lines[i:]
+        if email_to_remove_fail in line:
+            del mail_lines[i:]
+
+    # Ghi lại nội dung đã chỉnh sửa vào mail.txt
     with open("mail.txt", "w") as mail_file:
-        mail_file.writelines(unique_mail_lines)
+        mail_file.writelines(mail_lines)
 
 first_run = True 
 
@@ -48,4 +53,4 @@ while True:
     print("Running autoVote.py")
     sleep(3)
     subprocess.run(["python", "autoVote.py"])
-    print("autoVote.py terminated. Restarting...")
+    print("autoVote.py terminated. Restarting...",now)
