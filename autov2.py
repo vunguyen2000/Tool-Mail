@@ -3,7 +3,7 @@ import time
 import os
 import signal
 import sys
-
+from time import sleep  
 def remove_duplicates_from_mail():
     # Đọc nội dung của file success.txt và fail.txt
    with open("mail.txt", "r") as mail_file:
@@ -25,6 +25,8 @@ def remove_duplicates_from_mail():
     # Loại bỏ các dòng trong mail.txt mà đã xuất hiện trong success.txt hoặc fail.txt
     unique_mail_lines = [line for line in mail_lines if line.strip() not in success_lines and line.strip() not in fail_lines]
 
+    print("unique_mail_lines:",unique_mail_lines)
+
     # Ghi lại nội dung đã lọc vào file mail.txt
     with open("mail.txt", "w") as mail_file:
         mail_file.writelines(unique_mail_lines)
@@ -44,5 +46,6 @@ while True:
     # Chạy file a.py
     run_auto_vote()
     print("Running autoVote.py")
+    sleep(3)
     subprocess.run(["python", "autoVote.py"])
     print("autoVote.py terminated. Restarting...")

@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from time import sleep  
 from selenium.common.exceptions import TimeoutException
 import psutil
+import os
 from selenium.common.exceptions import NoSuchElementException
 
 def mailProcess(driver,driverVote,line):
@@ -48,20 +49,24 @@ def kill_chrome_processes(driverVote,driver):
     driverVote.quit()
     driver.service.stop()
     driver.quit()
-    for proc in psutil.process_iter():
-        try:
-            # Kiểm tra xem tên của quy trình có phải là "chrome.exe" không
-            if "chrome.exe" in proc.name():
-                # Tắt quy trình
-                proc.kill()
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-            pass
+    # os.system("taskkill /f /im geckodriver.exe /T")
+    # os.system("taskkill /f /im chromedriver.exe /T")
+    # os.system("taskkill /f /im IEDriverServer.exe /T")
+    # for proc in psutil.process_iter():
+    #     try:
+    #         # Kiểm tra xem tên của quy trình có phải là "chrome.exe" không
+    #         if "chrome.exe" in proc.name():
+    #             # Tắt quy trình
+    #             proc.kill()
+    #     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+    #         pass
 
 def process_account(line,name, passW):
-    driverVote = webdriver.Chrome()
+    optionsOne = webdriver.ChromeOptions() 
+    optionsOne.add_argument('--port=9515')
+    driverVote = webdriver.Chrome(options=optionsOne)
     # #Open bài vote
     driverVote.get('https://vnba.com.vn/net-dep-banker/bai-du-thi/3575')
-    
     driverVote.find_element(By.XPATH, '/html/body/main/div[3]/div[1]/div[2]/div/button').click()
 
     WebDriverWait(driverVote, 10).until(EC.presence_of_element_located((By.ID, 'email')))
@@ -70,6 +75,7 @@ def process_account(line,name, passW):
     sleep(1)
     # # Khởi tạo trình duyệt và mở Gmail
     options = webdriver.ChromeOptions() 
+    options.add_argument('--port=9515')
     options.add_argument("--lang=en-us")
     options = uc.ChromeOptions()
     options.add_argument('--no-sandbox')
@@ -170,24 +176,25 @@ def process_account(line,name, passW):
     try : 
          sleep(3)
          latest =  WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, '[role="main"] .zA')))
-         latest_emails = driver.find_elements(By.CSS_SELECTOR, '[role="main"] .zA')
+        #  latest_emails = driver.find_elements(By.CSS_SELECTOR, '[role="main"] .zA')
+         latest_emails = driver.execute_script("return document.querySelectorAll('[role=\"main\"] .zA')")
          code = None
-         flag = True
+        #  flag = True
          for email in latest_emails[:3]:
              sender = driver.execute_script("""
     var emailElement = arguments[0];
     return emailElement.querySelector('.zF').getAttribute('email');
+    return emailElement.querySelector('.zF').getAttribute('email');
 """, email)
-             print("sender",sender)
              if sender == 'info@vnba.com.vn':
                  email.click()
                  email_title_element = driver.find_element(By.CSS_SELECTOR, 'h2[class="hP"]')
                  code = email_title_element.text.split(":")[-1].strip()
                  break
-             elif sender != 'info@vnba.com.vn' and flag:
-                 print("Waiting...")
-                 sleep(60)
-                 return mailProcess(driver,driverVote,line)
+            #  elif sender != 'info@vnba.com.vn' and flag:
+            #      print("Waiting...")
+            #      sleep(60)
+            #      return mailProcess(driver,driverVote,line)
          if code:
              print("Code", code)
          else:
@@ -196,6 +203,8 @@ def process_account(line,name, passW):
               kill_chrome_processes(driverVote,driver)
     except:
          print("CAN'T CLICK CODE")
+         with open('fail.txt', 'a') as process_file:
+            process_file.write("{}\n".format(line))
          kill_chrome_processes(driverVote,driver)
          return
     #Nhập code
