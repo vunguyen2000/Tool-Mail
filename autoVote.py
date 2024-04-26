@@ -64,6 +64,7 @@ def kill_chrome_processes(driverVote,driver):
 def process_account(line,name, passW):
     optionsOne = webdriver.ChromeOptions() 
     optionsOne.add_argument('--port=9515')
+    optionsOne.add_argument('--start-minimized')
     driverVote = webdriver.Chrome(options=optionsOne)
     # #Open bài vote
     driverVote.get('https://vnba.com.vn/net-dep-banker/bai-du-thi/3575')
@@ -75,9 +76,10 @@ def process_account(line,name, passW):
     sleep(1)
     # # Khởi tạo trình duyệt và mở Gmail
     options = webdriver.ChromeOptions() 
+    options = uc.ChromeOptions()
     options.add_argument('--port=9516')
     options.add_argument("--lang=en-us")
-    options = uc.ChromeOptions()
+    options.add_argument('--start-minimized')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
     driver = uc.Chrome(options=options)
