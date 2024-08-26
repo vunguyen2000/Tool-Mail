@@ -79,6 +79,20 @@ def delete_zimbra_account(admin_url, auth_token, account_id):
     else:
         print(f'Có lỗi xảy ra khi xóa tài khoản: {r.content}')
 
+def is_email_exists(admin_url, auth_token, email):
+    headers = {'Content-Type': 'application/soap+xml'}
+    get_account_xml = '''<?xml version="1.0" ?><soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+    <soap:Header><context xmlns="urn:zimbra"><authToken>%s</authToken></context></soap:Header>
+    <soap:Body><GetAccountRequest xmlns="urn:zimbraAdmin">
+    <account by="name">%s</account></GetAccountRequest></soap:Body></soap:Envelope>''' % (auth_token, email)
+
+    r = requests.post(admin_url, data=get_account_xml, headers=headers)
+    if r.status_code == 200:
+        account_id = ET.fromstring(r.content).find('.//{urn:zimbraAdmin}account').get('id')
+        return True if account_id else False
+    else:
+        return False
+
 def main():
     # Giá trị mặc định
     admin_url = 'https://mail.agari.com.vn:7071/service/admin/soap'
@@ -89,15 +103,17 @@ def main():
     auth_token = get_auth_token(admin_url, admin_user, admin_password)
     if not auth_token:
         return
-
+    options = [
+    "Đổi mật khẩu",
+    "Tạo tài khoản mới",
+    "Xóa tài khoản",
+    "Kiểm tra tài khoản",
+    "Thoát"
+    ]
     while True:
-        print("\nChọn chức năng:")
-        print("1. Đổi mật khẩu")
-        print("2. Tạo tài khoản mới")
-        print("3. Xóa tài khoản")
-        print("4. Thoát")
-
-        choice = input("Nhập số lựa chọn (1/2/3/4): ")
+        for i, option in enumerate(options, start=1):
+             print(f"{i}. {option}")
+        choice = input("Nhập số lựa chọn (1/2/3/4/5): ")
 
         if choice == '1':
             email = input("Nhập địa chỉ email của tài khoản: ")
@@ -108,7 +124,7 @@ def main():
             else:
                 print(f'Không tìm thấy tài khoản với địa chỉ email: {email}')
         elif choice == '2':
-            new_account_email = input("Nhập địa chỉ email của tài khoản mới: ")
+            new_account_email = input("Nhập mail(Exp:vu.nguyen@agari.com.vn): ")
             new_account_password = input("Nhập mật khẩu của tài khoản mới (>6 kí tự): ")
             create_zimbra_account(admin_url, auth_token, new_account_email, new_account_password)
         elif choice == '3':
@@ -119,6 +135,12 @@ def main():
             else:
                 print(f'Không tìm thấy tài khoản với địa chỉ email: {email}')
         elif choice == '4':
+            email = input("Nhập email của tài khoản cần kiểm tra: ")
+            if is_email_exists(admin_url, auth_token, email):
+               print(f"Mail ${email} đã tồn tại")
+            else:
+               print(f'Không tìm thấy tài khoản với địa chỉ email: {email}')
+        elif choice == '5':
             print("Đang thoát...")
             break
         else:
