@@ -76,7 +76,7 @@ def process_account():
                 current_url = driver.current_url
                 if "?msg=CREATED" in current_url:
                     print(f"Tạo email {email} thành công.")
-                    logging.info(f'{email}@xiaomi-agari.com.vn - {new_password}')
+                    logging.info(f'{email} - {new_password}')
                     # Mở tab mới với URL tạo email
                     driver.execute_script("window.open('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn', '_blank');")
                     sleep(2)  # Đợi một chút để tab mới được mở
