@@ -10,10 +10,20 @@ from time import sleep
 desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "logXiaomi.txt")
 logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
-def create_password(email):
-    # Tạo mật khẩu theo định dạng: loại bỏ dấu . và thêm 123
+def generate_password(email):
     base_name = email.split('@')[0].replace('.', '')
-    return f'{base_name}123'
+    suffix = "12345678"
+    
+    # Tính toán số ký tự cần thêm từ dãy số để đạt đủ 8 ký tự
+    required_length = 8 - len(base_name)
+    
+    # Nếu base_name đã đủ hoặc thừa ký tự thì chỉ cần thêm đúng phần cần thiết
+    if required_length > 0:
+        password = base_name + suffix[:required_length]
+    else:
+        password = base_name
+    
+    return password
 
 def process_account():
     options = webdriver.ChromeOptions()
@@ -53,7 +63,7 @@ def process_account():
             try:
                 # Nhập thông tin vào các trường
                 print(f"\nTạo email mới: {email}")
-                new_password = create_password(email)
+                new_password = generate_password(email)
                 user_name = driver.find_element(By.NAME, "username")
                 user_name.clear()
                 user_name.send_keys(account)

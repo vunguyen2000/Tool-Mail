@@ -12,7 +12,7 @@ import logging
 # Cấu hình logging
 desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "log.txt")
 
-logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S',encoding='utf-8'   )
 
 def process_account():
     logging.info('------------ START ------------')
@@ -37,7 +37,7 @@ def process_account():
     driver.get('https://mail9092.maychuemail.com:1000/admin/users/xiaomi-agari.com.vn?order_name=quota&order_by=desc')
     sleep(2)
     rows = driver.find_elements(By.CSS_SELECTOR, 'table.style1 tbody tr')
-    for row in rows[:10]:
+    for index, row in enumerate(rows[:10]):
         try:
             email_element = row.find_element(By.CSS_SELECTOR, 'td:nth-of-type(3) span strong')
             email = email_element.text if email_element else 'Không có'
@@ -48,8 +48,14 @@ def process_account():
                 percentage = float(match.group(1))
             else:
                 percentage = 0
-            # Ghi thông tin vào log
-            if percentage > 85:
+            
+            # Nếu tài khoản đầu tiên có percentage dưới 85%, dừng lại không cần kiểm tra các tài khoản khác
+            if index == 0 and percentage < 85:
+                logging.info(f'Quota max: {percentage}%, Stop...')
+                break
+            
+            # Ghi thông tin vào log và xử lý nếu percentage > 85%
+            if percentage >= 85:
                 logging.info(f'{email} - {percentage}')
                 new_url = f'https://mail9092.maychuemail.com:1000/admin/profile/user/general/{email}@xiaomi-agari.com.vn'
                 driver.execute_script(f"window.open('{new_url}', '_blank');")
@@ -82,7 +88,9 @@ def process_account():
     driver.quit()
 
 def main():
+    print(f"-----------------------------------START JOB-----------------------------------")
     process_account()
+    print(f"--------------------------------------END--------------------------------------")
 
 if __name__ == '__main__':
     main()
