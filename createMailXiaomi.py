@@ -51,59 +51,84 @@ def process_account():
     # Đọc email từ file trên Desktop
     emails_file_path = os.path.join(os.path.expanduser("~"), "Desktop", "emailsXiaomi.txt")
     with open(emails_file_path, 'r') as file:
-        emails = file.readlines()[1:] #Bỏ dòng đầu
+        emails = file.readlines()[2:] #Bỏ dòng đầu
     
     for email in emails:
         email = email.strip()  
-        driver.get('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn')
-        account = email.split('@')[0]
-        sleep(2)
-        
-        while True:  # Vòng lặp bên trong để xử lý lỗi
-            try:
-                # Nhập thông tin vào các trường
-                print(f"\nTạo email mới: {email}")
-                new_password = generate_password(email)
-                user_name = driver.find_element(By.NAME, "username")
-                user_name.clear()
-                user_name.send_keys(account)
-                new_pass = driver.find_element(By.NAME, "newpw")
-                new_pass.clear()
-                new_pass.send_keys(new_password)
-                confirm_pass = driver.find_element(By.NAME, "confirmpw")
-                confirm_pass.clear()
-                confirm_pass.send_keys(new_password)
-                display_name = driver.find_element(By.NAME, "cn")
-                display_name.clear()
-                display_name.send_keys(account)
-                quota = driver.find_element(By.NAME, "mailQuota")
-                quota.clear()
-                quota.send_keys(500)
-                element = driver.find_element(By.NAME, 'submit_add_user')
-                element.click()
-                # Kiểm tra URL để xác định xem tạo email có thành công hay không
-                sleep(2)  # Đợi một chút cho trang chuyển hướng
-                current_url = driver.current_url
-                if "?msg=CREATED" in current_url:
-                    print(f"Tạo email {email} thành công.")
-                    logging.info(f'{email} - {new_password}')
-                    # Mở tab mới với URL tạo email
-                    driver.execute_script("window.open('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn', '_blank');")
-                    sleep(2)  # Đợi một chút để tab mới được mở
-                    driver.close()  # Đóng tab cũ
-                    driver.switch_to.window(driver.window_handles[0])  # Chuyển đến tab mới
-                    sleep(2)  # Đợi một chút trước khi tiếp tục
-                    break  # Thoát khỏi vòng lặp bên trong nếu thành công
-                else:
-                    print("Mail đã tồn tại hoặc có lỗi. Vui lòng kiểm tra lại.")
-                    logging.error(f'Email {email}')
+        if ' - ' in email:
+            # Đổi mật khẩu
+            username, password = email.split(' - ')
+            driver.get(f'https://mail9092.maychuemail.com:1000/admin/profile/user/general/{username}')
+            link_element = driver.find_element(By.CSS_SELECTOR,'a[href="#profile_password"]').click()
+            newpw = driver.find_element(By.NAME, "newpw")
+            newpw.send_keys(password)
+            confirmpw = driver.find_element(By.NAME, "confirmpw")
+            confirmpw.send_keys(password)
+            sleep(2)
+            driver.execute_script("document.getElementsByClassName('button green')[7].click()")
+            if "?msg=CREATED" in current_url:
+                        print(f"Tạo email {email} thành công.")
+                        logging.info(f'{email}')
+                        # Mở tab mới với URL tạo email
+                        driver.execute_script("window.open('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn', '_blank');")
+                        sleep(2)  # Đợi một chút để tab mới được mở
+                        driver.close()  # Đóng tab cũ
+                        driver.switch_to.window(driver.window_handles[0])  # Chuyển đến tab mới
+                        sleep(2)  # Đợi một chút trước khi tiếp tục
+            else:
+                        print("Mail đã tồn tại hoặc có lỗi. Vui lòng kiểm tra lại.")
+                        logging.error(f'Email {email}')
+                        sleep(2)
+                        break  # Thoát khỏi vòng lặp bên trong nếu có lỗi không thể khắc phục
+        else:
+            driver.get('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn')
+            account = email.split('@')[0]
+            sleep(2)
+            while True:  # Vòng lặp bên trong để xử lý lỗi
+                try:
+                    # Nhập thông tin vào các trường
+                    print(f"\nTạo email mới: {email}")
+                    new_password = generate_password(email)
+                    user_name = driver.find_element(By.NAME, "username")
+                    user_name.clear()
+                    user_name.send_keys(account)
+                    new_pass = driver.find_element(By.NAME, "newpw")
+                    new_pass.clear()
+                    new_pass.send_keys(new_password)
+                    confirm_pass = driver.find_element(By.NAME, "confirmpw")
+                    confirm_pass.clear()
+                    confirm_pass.send_keys(new_password)
+                    display_name = driver.find_element(By.NAME, "cn")
+                    display_name.clear()
+                    display_name.send_keys(account)
+                    quota = driver.find_element(By.NAME, "mailQuota")
+                    quota.clear()
+                    quota.send_keys(500)
+                    element = driver.find_element(By.NAME, 'submit_add_user')
+                    element.click()
+                    # Kiểm tra URL để xác định xem tạo email có thành công hay không
+                    sleep(2)  # Đợi một chút cho trang chuyển hướng
+                    current_url = driver.current_url
+                    if "?msg=CREATED" in current_url:
+                        print(f"Tạo email {email} thành công.")
+                        logging.info(f'{email} - {new_password}')
+                        # Mở tab mới với URL tạo email
+                        driver.execute_script("window.open('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn', '_blank');")
+                        sleep(2)  # Đợi một chút để tab mới được mở
+                        driver.close()  # Đóng tab cũ
+                        driver.switch_to.window(driver.window_handles[0])  # Chuyển đến tab mới
+                        sleep(2)  # Đợi một chút trước khi tiếp tục
+                        break  # Thoát khỏi vòng lặp bên trong nếu thành công
+                    else:
+                        print("Mail đã tồn tại hoặc có lỗi. Vui lòng kiểm tra lại.")
+                        logging.error(f'Email {email}')
+                        sleep(2)
+                        break  # Thoát khỏi vòng lặp bên trong nếu có lỗi không thể khắc phục
+                except Exception as e:
+                    print(f"Có lỗi xảy ra: {e}")
+                    logging.error(f'Lỗi khi tạo email {email}')
                     sleep(2)
-                    break  # Thoát khỏi vòng lặp bên trong nếu có lỗi không thể khắc phục
-            except Exception as e:
-                print(f"Có lỗi xảy ra: {e}")
-                logging.error(f'Lỗi khi tạo email {email}')
-                sleep(2)
-                break  # Thoát khỏi vòng lặp bên trong nếu có lỗi xảy ra
+                    break  # Thoát khỏi vòng lặp bên trong nếu có lỗi xảy ra
     driver.service.stop()
     driver.quit()
 
