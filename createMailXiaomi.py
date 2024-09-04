@@ -7,7 +7,8 @@ import logging
 from time import sleep
 
 # Cấu hình logging
-desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "logXiaomi.txt")
+desktop_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "logXiaomi.txt")
+
 logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
 def generate_password(email):
@@ -22,6 +23,11 @@ def generate_password(email):
         password = base_name + suffix[:required_length]
     else:
         password = base_name
+    
+    # Đảm bảo mật khẩu có ít nhất một số 1 nếu dài hơn 8 ký tự
+    if len(password) > 8 and '1' not in password:
+        # Thay thế ký tự cuối cùng bằng số 1
+        password =  password+ '1'
     
     return password
 
@@ -49,7 +55,7 @@ def process_account():
     sleep(2)
 
     # Đọc email từ file trên Desktop
-    emails_file_path = os.path.join(os.path.expanduser("~"), "Desktop", "emailsXiaomi.txt")
+    emails_file_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "emailsXiaomi.txt")
     with open(emails_file_path, 'r') as file:
         emails = file.readlines()[2:] #Bỏ dòng đầu
     

@@ -10,7 +10,7 @@ import os
 import logging
 
 # Cấu hình logging
-desktop_path = os.path.join(os.path.expanduser("~"), "Desktop", "log.txt")
+desktop_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "log.txt")
 
 logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S',encoding='utf-8'   )
 

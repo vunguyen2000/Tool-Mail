@@ -44,27 +44,43 @@ def change_password(admin_url, auth_token, account_id, new_password):
     else:
         print(f'Có lỗi xảy ra khi thay đổi mật khẩu: {r.content}')
 
+def escape_xml_chars(text):
+    """Thay thế các ký tự đặc biệt trong XML để đảm bảo tính hợp lệ của XML."""
+    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;').replace("'", '&apos;')
+
 def create_zimbra_account(admin_url, auth_token, new_account_email, new_account_password):
     headers = {'Content-Type': 'application/soap+xml'}
-    email_prefix = new_account_email.split('@')[0]
+    email_prefix = escape_xml_chars(new_account_email.split('@')[0])
     first_name = email_prefix
     last_name = email_prefix
     display_name = email_prefix
 
-    create_account_xml = '''<?xml version="1.0" ?><soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
-    <soap:Header><context xmlns="urn:zimbra"><authToken>%s</authToken></context></soap:Header>
-    <soap:Body><CreateAccountRequest xmlns="urn:zimbraAdmin">
-    <name>%s</name><password>%s</password>
-    <a n="givenName">%s</a>
-    <a n="sn">%s</a>
-    <a n="displayName">%s</a>
-    </CreateAccountRequest></soap:Body></soap:Envelope>''' % (auth_token, new_account_email, new_account_password, first_name, last_name, display_name)
+    create_account_xml = '''<?xml version="1.0" encoding="UTF-8"?>
+    <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope">
+        <soap:Header>
+            <context xmlns="urn:zimbra">
+                <authToken>%s</authToken>
+            </context>
+        </soap:Header>
+        <soap:Body>
+            <CreateAccountRequest xmlns="urn:zimbraAdmin">
+                <name>%s</name>
+                <password>%s</password>
+                <a n="givenName">%s</a>
+                <a n="sn">%s</a>
+                <a n="displayName">%s</a>
+            </CreateAccountRequest>
+        </soap:Body>
+    </soap:Envelope>''' % (escape_xml_chars(auth_token), escape_xml_chars(new_account_email), new_account_password, first_name, last_name, display_name)
 
-    r = requests.post(admin_url, data=create_account_xml, headers=headers)
-    if r.status_code == 200:
+    try:
+        r = requests.post(admin_url, data=create_account_xml, headers=headers)
+        r.raise_for_status()  # Raise an error for bad HTTP status codes
         print(f'Tài khoản {new_account_email} đã được tạo thành công.')
-    else:
-        print(f'Không thể tạo tài khoản {new_account_email}. Lỗi: {r.content}')
+    except requests.exceptions.HTTPError as err:
+        print(f'HTTP Error: {err}')
+    except requests.exceptions.RequestException as e:
+        print(f'Error: {e}')
 
 def delete_zimbra_account(admin_url, auth_token, account_id):
     headers = {'Content-Type': 'application/soap+xml'}
