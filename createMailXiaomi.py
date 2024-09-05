@@ -28,7 +28,6 @@ def generate_password(email):
     if len(password) > 8 and '1' not in password:
         # Thay thế ký tự cuối cùng bằng số 1
         password =  password+ '1'
-    
     return password
 
 def process_account():
@@ -58,12 +57,14 @@ def process_account():
     emails_file_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "emailsXiaomi.txt")
     with open(emails_file_path, 'r') as file:
         emails = file.readlines()[2:] #Bỏ dòng đầu
+        cleaned_data = [item.strip() for item in emails if item.strip()]
     
-    for email in emails:
+    for email in cleaned_data:
         email = email.strip()  
         if ' - ' in email:
             # Đổi mật khẩu
             username, password = email.split(' - ')
+            print(f"Đổi pass email {username} - pass: {password}.")
             driver.get(f'https://mail9092.maychuemail.com:1000/admin/profile/user/general/{username}')
             link_element = driver.find_element(By.CSS_SELECTOR,'a[href="#profile_password"]').click()
             newpw = driver.find_element(By.NAME, "newpw")
@@ -72,8 +73,9 @@ def process_account():
             confirmpw.send_keys(password)
             sleep(2)
             driver.execute_script("document.getElementsByClassName('button green')[7].click()")
-            if "?msg=CREATED" in current_url:
-                        print(f"Tạo email {email} thành công.")
+            current_url = driver.current_url
+            if "?msg=UPDATED" in current_url:
+                        print(f"Đổi pass email {email} thành công.")
                         logging.info(f'{email}')
                         # Mở tab mới với URL tạo email
                         driver.execute_script("window.open('https://mail9092.maychuemail.com:1000/admin/create/user/xiaomi-agari.com.vn', '_blank');")
@@ -82,7 +84,7 @@ def process_account():
                         driver.switch_to.window(driver.window_handles[0])  # Chuyển đến tab mới
                         sleep(2)  # Đợi một chút trước khi tiếp tục
             else:
-                        print("Mail đã tồn tại hoặc có lỗi. Vui lòng kiểm tra lại.")
+                        print("Không thể đổi pass.")
                         logging.error(f'Email {email}')
                         sleep(2)
                         break  # Thoát khỏi vòng lặp bên trong nếu có lỗi không thể khắc phục
