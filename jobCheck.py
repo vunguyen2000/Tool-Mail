@@ -9,11 +9,26 @@ from time import sleep
 import os
 import logging
 
-# Cấu hình logging
-desktop_path = os.path.join(os.path.expanduser("~"), "OneDrive", "Desktop", "log.txt")
+# Kiểm tra xem thư mục OneDrive có tồn tại không
+desktop_path = os.path.expanduser("~/Desktop")  # Get the user's Desktop path
+one_drive_path = os.path.join(desktop_path, "OneDrive")
+if os.path.exists(one_drive_path):
+    desktop_path = os.path.join(one_drive_path, "Desktop", "log.txt")
+else:
+    desktop_path = os.path.join(desktop_path, "log.txt")
 
-logging.basicConfig(filename=desktop_path, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', datefmt='%Y-%m-%d %H:%M:%S',encoding='utf-8'   )
+# Ensure the directory exists
+log_dir = os.path.dirname(desktop_path)
+os.makedirs(log_dir, exist_ok=True)
 
+# Configure logging
+logging.basicConfig(
+    filename=desktop_path,
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    encoding='utf-8'
+)
 def process_account():
     logging.info('------------ START ------------')
     options = webdriver.ChromeOptions() 
