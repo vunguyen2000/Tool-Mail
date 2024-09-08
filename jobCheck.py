@@ -10,25 +10,23 @@ import os
 import logging
 
 # Kiểm tra xem thư mục OneDrive có tồn tại không
-desktop_path = os.path.expanduser("~/Desktop")  # Get the user's Desktop path
-one_drive_path = os.path.join(desktop_path, "OneDrive")
-if os.path.exists(one_drive_path):
-    desktop_path = os.path.join(one_drive_path, "Desktop", "log.txt")
-else:
-    desktop_path = os.path.join(desktop_path, "log.txt")
+desktop_path = os.path.expanduser("~/Desktop")
+
+# Đường dẫn tới file log.txt
+log_file_path = os.path.join(desktop_path, "log.txt")
 
 # Ensure the directory exists
-log_dir = os.path.dirname(desktop_path)
-os.makedirs(log_dir, exist_ok=True)
+os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
-    filename=desktop_path,
+    filename=log_file_path,
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     encoding='utf-8'
 )
+
 def process_account():
     logging.info('------------ START ------------')
     options = webdriver.ChromeOptions() 
