@@ -25,7 +25,7 @@ def generate_password(email):
         password = base_name
     
     # Đảm bảo mật khẩu có ít nhất một số 1 nếu dài hơn 8 ký tự
-    if len(password) > 8 and '1' not in password:
+    if len(password) >= 8 and '1' not in password:
         # Thay thế ký tự cuối cùng bằng số 1
         password =  password+ '1'
     return password
